@@ -1,0 +1,16 @@
+  {
+    "name": "olxyz",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+      "start": "node ."
+    },
+    "author": "Muhammad Adriansyah",
+    "license": "MIT",
+    "dependencies": {
+      "@xyzendev/modules": "latest",
+      "file-type": "latest"
+    }
+  }
