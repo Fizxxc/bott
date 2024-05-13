@@ -1,7 +1,7 @@
 /**
  *  The MIT License (MIT)
- *  Copyright (c) 2024 by @xyzendev - Adriansyah
- *  © 2024 by @xyzendev - Adriansyah | MIT License
+ *  Copyright (c) 2024 by @choxzyndev - Rasya
+ *  © 2024 by @choxzydev - Rasya | MIT License
  */
 import makeWASocket, { delay, useMultiFileAuthState, fetchLatestWaWebVersion, makeInMemoryStore, jidNormalizedUser, PHONENUMBER_MCC, DisconnectReason, Browsers, makeCacheableSignalKeyStore } from "@xyzendev/baileys";
 import { Config, smsg, Module, treeKill } from "../index.js"
@@ -15,9 +15,11 @@ logger.level = "fatal"
 
 // const pathContacts = "./src/database/contacts.json";
 // const pathMetadata = "./src/database/metadata.json";
+global.API = (name, path = '/', query = {}, apikeyqueryname) => (name in config.APIs ? config.APIs[name] : name) + path + (query || apikeyqueryname ? '?' + new URLSearchParams(Object.entries({ ...query, ...(apikeyqueryname ? { [apikeyqueryname] : config.APIKeys[name in config.APIs ? config.APIs[name] : name] } : {}) })) : '');
 
 const usePairing = Config.usePairingCode
 const store = makeInMemoryStore({ logger });
+const database = (new (await import('../../lib/database.js')).default());
 
 if (Config.Settings.write_store) store.readFromFile("./src/database/store.json")
 
@@ -31,6 +33,18 @@ cfonts.say("choco-md", {
 
 
 const Connecting = async () => {
+    const content = await database.read()
+        if (content && Object.keys(content).length === 0) {
+        global.db = {
+        users: {},
+        groups: {},
+        setting: {},
+        ...(content || {}),
+    }
+    await database.write(global.db)
+    } else {
+        global.db = content
+     }
     const {
         state,
         saveCreds
@@ -265,6 +279,11 @@ const Connecting = async () => {
             store.writeToFile("./src/database/store.json", true)
         }
     }, 10 * 1000)
+
+      // rewrite database every 30 seconds
+    setInterval(async () => {
+        if (global.db) await database.write(global.db)
+    }, 30000) // write database every 30 seconds
 
     process.on("uncaughtException", console.error)
     process.on("unhandledRejection", console.error)

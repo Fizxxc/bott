@@ -1,0 +1,79 @@
+{
+  "users": {
+    "6285791346128@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715616402021,
+      "premium": false,
+      "VIP": false,
+      "name": "chocozypyy",
+      "banned": false
+    },
+    "6285731369029@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715616402470,
+      "premium": false,
+      "VIP": false,
+      "name": "",
+      "banned": false
+    },
+    "6282183040717@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715616499771,
+      "premium": false,
+      "VIP": false,
+      "name": "nalardelouis",
+      "banned": false
+    },
+    "6285175200902@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715616838930,
+      "premium": false,
+      "VIP": false,
+      "name": "?",
+      "banned": false
+    },
+    "6285642673699@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715618799441,
+      "premium": false,
+      "VIP": false,
+      "name": "`Sezyy`",
+      "banned": false
+    }
+  },
+  "groups": {
+    "120363143416768935@g.us": {
+      "lastChat": 1715616499771,
+      "mute": false,
+      "welcome": true,
+      "leave": true
+    },
+    "120363293655206233@g.us": {
+      "lastChat": 1715617888309,
+      "mute": false,
+      "welcome": true,
+      "leave": true
+    },
+    "120363295542967455@g.us": {
+      "lastChat": 1715618760628,
+      "mute": false,
+      "welcome": true,
+      "leave": true
+    }
+  },
+  "setting": {
+    "autoread": false,
+    "cover": "https://iili.io/JAt7vf4.jpg",
+    "link": "https://chat.whatsapp.com/G57unQZ7saFIq2rdpVw0Tu"
+  }
+}

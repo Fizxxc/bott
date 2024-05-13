@@ -30,6 +30,12 @@ const badword = JSON.parse(fs.readFileSync('./src/database/function/badword.json
 
 export default async function Message(client, store, m, chatUpdate) {
     try {
+        if (!m) return
+        if (m.from && db.groups[m.from]?.mute && !m.isOwner) return
+        if (m.isBaileys) return
+    
+        (await import('../../lib/loadDatabase.js')).default(m)
+        
         let body = (m.type === 'conversation') ? m.message.conversation : (m.type == 'imageMessage') ? m.message.imageMessage.caption : (m.type == 'videoMessage') ? m.message.videoMessage.caption : (m.type == 'extendedTextMessage') ? m.message.extendedTextMessage.text : (m.type == 'buttonsResponseMessage') ? m.message.buttonsResponseMessage.selectedButtonId : (m.type == 'listResponseMessage') ? m.message.listResponseMessage.singleSelectReply.selectedRowId : (m.type == 'templateButtonReplyMessage') ? m.message.templateButtonReplyMessage.selectedId : (m.type == 'interactiveResponseMessage') ? appenTextMessage(JSON.parse(m.msg.nativeFlowResponseMessage.paramsJson).id, chatUpdate, m, client) : (m.type == 'templateButtonReplyMessage') ? appenTextMessage(m.msg.selectedId, chatUpdate, m, client) : (m.type === 'messageContextInfo') ? (m.message.buttonsResponseMessage?.selectedButtonId || m.message.listResponseMessage?.singleSelectReply.selectedRowId || m.text) : ''
         let quoted = m.isQuoted ? m.quoted : m
         let Downloaded = async (fileName) => await client.downloadMediaMessage(quoted, fileName)
@@ -55,6 +61,24 @@ export default async function Message(client, store, m, chatUpdate) {
             }
         }
 
+        // AFK
+    let jids = [...new Set([...(m.mentions || []), ...(m.quoted ? [m.quoted.sender] : [])])]
+    for (let jid of jids) {
+      let user = db.users[jid]
+      if (!user) continue
+      let afkTime = user.afkTime
+      if (!afkTime || afkTime < 0) continue
+      let reason = user.afkReason || ''
+      m.reply(`Jangan tag dia!\nDia sedang AFK ${reason ? 'dengan alasan ' + reason : 'tanpa alasan'} Selama ${Func.toTime(new Date - afkTime)}`)
+    }
+
+    if (db.users[m.sender].afkTime > -1) {
+      let user = db.users[m.sender]
+      m.reply(`Kamu berhenti AFK${user.afkReason ? ' setelah ' + user.afkReason : ''}\n\nSelama ${Func.toTime(new Date() - user.afkTime)}`)  
+      user.afkTime = -1
+      user.afkReason = ''
+    }
+
         if (m.isBot) return;
 
         if (Config.Settings.read && isCommand) {
@@ -73,6 +97,44 @@ export default async function Message(client, store, m, chatUpdate) {
                 `${chalk.blue("MESSAGE")}: ${chalk.green(messageContent)}\n` +
                 `🕒 ${new Date().toLocaleTimeString()}`
             );
+        }
+        client.autoshalat = client.autoshalat ? client.autoshalat : {};
+        let who =
+          m.mentionedJid && m.mentionedJid[0]
+        ? m.mentionedJid[0]
+        : m.fromMe
+          ? client.user.id
+          : m.sender;
+        let id = m.chat;
+        if (id in client.autoshalat) {
+          return false;
+        }
+        let jadwalSholat = {
+          Shubuh: "04:12",
+          Dzuhur: "11:27",
+          Ashar: "14:48",
+          Maghrib: "17:20",
+          Isya: "18:33",
+          Tahajud: "00:04",
+        };
+        const datek = new Date(
+          new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Jakarta",
+          }),
+        );
+        const hours = datek.getHours();
+        const minutes = datek.getMinutes();
+        const timeNow = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+        for (let [sholat, waktu] of Object.entries(jadwalSholat)) {
+          if (timeNow === waktu) {
+        let caption = `📢 Hai Kak @${m.pushName}, *Waktu ${sholat}* telah tiba, ambilah air wudhu dan segeralah shalat 😇.\n\n*${waktu}*\n_Untuk wilayah JawaTimur dan sekitarnya._\n\n_Luangkan Waktu Mu Sejenak Untuk Mendekatkan Diri Kepada Yang Maha Kuasa_`;
+        client.autoshalat[id] = [
+          m.reply(caption),
+          setTimeout(async() => {
+        delete client.autoshalat[m.chat];
+          }, 57000),
+        ];
+          }
         }
         // Check if the message is a command
         switch (isCommand ? m.command.toLowerCase() : false) {
@@ -132,7 +194,7 @@ export default async function Message(client, store, m, chatUpdate) {
                             }
                         }
                     }, { quoted: m })
-                } else if (Config.Settings.typeMenu === 3 /*&& !m.isGroup*/) {
+                } else if (Config.Settings.typeMenu === 3 && !m.isGroup) {
                     let sections = [{ title: "Sub-Menu", highlight_label: "List Command", rows: [{ title: "ALL MENU", description: "Show all commands", id: ".allmenu" }, { title: "BASIC MENU", description: "Show basic commands", id: ".basicmenu" }, { title: "SYSTEM MENU", description: "Show system commands", id: ".systemmenu" }, { title: "MANAGEMENT MENU", description: "Show management commands", id: ".managementmenu" }, { title: "GROUP MENU", description: "Show group commands", id: ".groupmenu" }, { title: "DOWNLOADER MENU", description: "Show downloader commands", id: ".downloadmenu" }, { title: "SEARCH MENU", description: "Show search commands", id: ".searchmenu" }, { title: "UTILITIES MENU", description: "Show utilities commands", id: ".utilitiesmenu" }, { title: "FUN MENU", description: "Show fun commands", id: ".funmenu" }, { title: "ISLAMI MENU", description: "Show islami commands", id: ".islamimenu" }], }, { title: "Populer Command", highlight_label: "Populer Command", rows: [{ title: "Thanks To", description: "Show thanks to", id: ".thanks" }, { title: "Ping", description: "Show ping", id: ".ping" }, { title: "Bot Status", description: "Show bot status", id: ".botstatus" }, { title: "Owner", description: "Show owner", id: ".owner" }, { title: "Runtime", description: "Show runtime", id: ".runtime" }] }]
                     let listMessage = { title: 'Click Me :)', sections };
                     let msg = generateWAMessageFromContent(m.from, {
@@ -190,7 +252,7 @@ export default async function Message(client, store, m, chatUpdate) {
                     await client.relayMessage(msg.key.remoteJid, msg.message, {
                         messageId: msg.key.id
                     })
-                } else if (Config.Settings.typeMenu === 3 /*&& m.isGroup*/) {
+                } else if (Config.Settings.typeMenu === 3 && m.isGroup) {
                     client.sendMessage(m.from, {
                         text: text + menu,
                         contextInfo: {
@@ -235,6 +297,14 @@ export default async function Message(client, store, m, chatUpdate) {
             case "systemmenu": {
                 let text = `*System Commands*\n\n`;
                 Config.Menu.system.forEach(command => {
+                    text += `> ${m.prefix + command}\n`;
+                });
+                m.reply(text);
+            }
+                break;
+            case "aimenu": {
+                let text = `*AI Commands*\n\n`;
+                Config.Menu.ai.forEach(command => {
                     text += `> ${m.prefix + command}\n`;
                 });
                 m.reply(text);
@@ -311,6 +381,11 @@ export default async function Message(client, store, m, chatUpdate) {
                 m.reply(text)
             }
                 break
+            case "sc":
+            case "sourecode":{
+                m.reply("contact owner")
+            }
+                break
             case "ping": {
                 let a = await Date.now()
                 m.reply("Pong!")
@@ -327,7 +402,12 @@ export default async function Message(client, store, m, chatUpdate) {
             case "owner":
             case "creator":
             case "author": {
-                await client.sendContact(m.from, Config.Owner, m)
+                let setMsg = await client.sendContact(m.from, Config.Owner, m);
+                await client.sendMessage(
+                    m.from,
+                    { text: "This is my owner's number, no calls or spam texts!"},
+                    { quoted: setMsg },
+                );
             }
                 break
             case "runtime":
@@ -622,6 +702,49 @@ export default async function Message(client, store, m, chatUpdate) {
                 m.reply(text)
             }
                 break
+            case "checkapi":
+            case "checkkey":
+            case "checkapikey":{
+                if (!m.isCreator) return m.reply("Sorry, only the bot owner can use this command.");
+                switch (m.args[0]) {
+                    case "Lol":
+                    case "Lolhuman":
+                        let aa = await Func.fetchJson(`https://api.lolhuman.xyz/api/checkapikey?apikey=${Config.Apikey.Lol}`)
+                        let bb = `> *Username: ${aa.result.username}*\n`
+                        bb += `> *Request: ${aa.result.requests}*\n`
+                        bb += `> *Today: ${aa.result.today}*\n`
+                        bb += `> *Account Type: ${aa.result.account_type}*\n`
+                        bb += `> *Expired: ${aa.result.expired}*\n`
+                        m.reply(bb)
+                        break
+                    case "Alya":
+                        timer = m.args[0] * 60000;
+                        break;
+                    case 'Kii':
+                    case 'Kiicodeit':
+                        let a = await Func.fetchJson(`https://api.kiicodeit.me/users/cekApikey?apikey=${Config.Apikey.Kii}`)
+                        let b = `> *Username: ${a.result.usename}*\n`
+                        b += `> *Email: ${a.result.email}*\n`
+                        b += `> *Limit: ${a.result.limit}*\n`
+                        b += `> *Premium: ${a.result.premium}*\n`
+                        m.reply(b)
+                        break;
+                    case 'Btc':
+                    case 'botcahx':
+                        let c = await Func.fetchJson(`https://api.botcahx.eu.org/api/checkkey?apikey=${Config.Apikey.Btc}`)
+                        let n = `> *Username: ${c.result.username}*\n`
+                        n += `> *Email: ${c.result.email}*\n`
+                        n += `> *Limit: ${c.result.limit}*\n`
+                        n += `> *Premium: ${c.result.premium}*\n`
+                        n += `> *Expired: ${c.result.expired}*\n`
+                        n += `> *Today: ${c.result.todayHit}*\n`
+                        n += `> *Total Hit: ${c.result.totalHit}*\n`
+                        m.reply(n)
+                        break;
+                    default: return m.reply("*Choose:*\nLol\nAlya\nKii\nBtc")
+                }
+            }
+                break
             case "setapikey": {
                 if (!m.isCreator) return m.reply("Sorry, only the bot owner can use this command.");
                 if (!m.args[0]) return m.reply("Please enter the name of the API key.");
@@ -817,15 +940,19 @@ export default async function Message(client, store, m, chatUpdate) {
 
                 let timer;
                 switch (m.args[1]) {
+                    case "second":
                     case "detik":
                         timer = m.args[0] * 1000;
                         break
+                    case "minute":
                     case "menit":
                         timer = m.args[0] * 60000;
                         break;
+                    case 'hour':
                     case 'jam':
                         timer = m.args[0] * 3600000;
                         break;
+                    case 'day':
                     case 'hari':
                         timer = m.args[0] * 86400000;
                         break;
@@ -844,15 +971,19 @@ export default async function Message(client, store, m, chatUpdate) {
 
                 let timer;
                 switch (m.args[1]) {
+                    case "second":
                     case "detik":
                         timer = m.args[0] * 1000;
                         break
+                    case "minute":
                     case "menit":
                         timer = m.args[0] * 60000;
                         break;
+                    case 'hour':
                     case 'jam':
                         timer = m.args[0] * 3600000;
                         break;
+                    case 'day':
                     case 'hari':
                         timer = m.args[0] * 86400000;
                         break;
@@ -879,6 +1010,7 @@ export default async function Message(client, store, m, chatUpdate) {
                 }
             }
                 break
+            case "totag":
             case "tagall": {
                 if (!m.isGroup) return m.reply("This command is only available in groups.");
                 if (!m.isAdmin && !m.isCreator) return m.reply("Only group admins can use this command.");
@@ -889,12 +1021,20 @@ export default async function Message(client, store, m, chatUpdate) {
                 await client.sendMessage(m.from, { text: message, mentions: m.metadata.participants.map(a => a.id) }, { quoted: m });
             }
                 break
+            case "h":
+            case "ht":
             case "hidetag": {
+                /*if (quoted.isMedia) {
+                    let media = await Downloaded();
+                    let upload = await Func.upload.pomf(media);
+                    await client.sendMessage(m.from, { image: { url: upload }, text: m.text ? m.text : "", mentions: m.metadata.participants.map(a => a.id) }, { quoted: m })
+                } else if (m.text) {*/
                 if (!m.isGroup) return m.reply("This command is only available in groups.");
                 if (!m.isAdmin && !m.isCreator) return m.reply("Only group admins can use this command.");
                 if (!m.text) return m.reply("Apologies, but it seems like no text was provided with your command. Please provide some text for me to proceed.")
                 await client.sendMessage(m.from, { text: m.text ? m.text : "", mentions: m.metadata.participants.map(a => a.id) }, { quoted: m })
-            }
+            //}
+        }
                 break
             case "antibadword":
             case "antiword": {
@@ -1126,6 +1266,23 @@ export default async function Message(client, store, m, chatUpdate) {
                 }
             }
                 break
+            case "elaina":{
+                if (!m.text) return m.reply("Please enter prompt.");
+                let a = await Func.fetchJson(`https://api.kiicodeit.me/ai/character-ai?character=${Config.CAi.Elaina}&text=${m.text}&apikey=${Config.Apikey.Kii}`);
+                let load = await client.sendMessage(m.from, {text: 'Elaina Typing'},{quoted:m})
+                await Func.delay(4000)
+                await client.sendMessage(m.from, {text: a.result, edit: load.key },{quoted:m})
+            }
+                break
+            case "ros":
+            case "kakros":{
+                if (!m.text) return m.reply("Please enter prompt.");
+                let a = await Func.fetchJson(`https://api.kiicodeit.me/ai/character-ai?character=${Config.CAi.Kakros}&text=${m.text}&apikey=${Config.Apikey.Kii}`);
+                let load = await client.sendMessage(m.from, {text: 'Kak Ros typing'},{quoted:m})
+                await Func.delay(2000)
+                await client.sendMessage(m.from, {text: a.result, edit: load.key },{quoted:m})
+            }
+                break
             case "openai":
             case "openaii":
             case "ai":
@@ -1243,6 +1400,133 @@ export default async function Message(client, store, m, chatUpdate) {
                 await m.reply(url)
             }
                 break
+                case 'pin2': {
+                    if (!m.text) return m.reply(`michie`);
+                    const res = await Func.fetchJson(`https://api.kiicodeit.me/search/pinterest?query=${m.text}&apikey=chocozy`);
+                     
+                    const url = `${res.result[0]}`;
+                    const url2 = `${res.result[1]}`;
+                    const url3 = `${res.result[2]}`;
+                    const url4 = `${res.result[3]}`;
+                    const url5 = `${res.result[4]}`;
+                    async function image(url, url2, url3, url4, url5) {
+                    const { imageMessage } = await baileys.generateWAMessageContent({
+                        image: {
+                          url, url2, url3, url4, url5
+                        }
+                      }, {
+                        upload: client.waUploadToServer
+                      })
+                      return imageMessage
+                    }
+                    
+                    
+                        let msg = baileys.generateWAMessageFromContent(
+                          m.chat,
+                          {
+                            viewOnceMessage: {
+                              message: {
+                                interactiveMessage: {
+                                  body: { text: `Hai kak ${m.pushname} berikut 5 foto dari pinterest yang anda cari
+                                  *Result By: ${m.text}` },
+                                  carouselMessage: {
+                                    cards: [
+                                      {
+                                        header: {
+                                          imageMessage: await image(url),
+                                          hasMediaAttachment: true,
+                                        },
+                                        body: { text: "Image 1/5" },
+                                        nativeFlowMessage: {
+                                          buttons: [
+                                            {
+                                              name: "cta_url",
+                                              buttonParamsJson:
+                                                '{"display_text":"CLICK HERE","url":"https://api.kiicodeit.me","webview_presentation":null}',
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      {
+                                        header: {
+                                          imageMessage: await image(url2),
+                                          hasMediaAttachment: true,
+                                        },
+                                        body: { text: "Image 2/5" },
+                                        nativeFlowMessage: {
+                                          buttons: [
+                                            {
+                                              name: "cta_url",
+                                              buttonParamsJson:
+                                                '{"display_text":"CLICK HERE","url":"https://api.kiicodeit.me","webview_presentation":null}',
+                                            },
+                                          ],
+                                        },
+                                      },
+                                                        {
+                                        header: {
+                                          imageMessage: await image(url3),
+                                          hasMediaAttachment: true,
+                                        },
+                                        body: { text: "Image 3/5" },
+                                        nativeFlowMessage: {
+                                          buttons: [
+                                            {
+                                              name: "cta_url",
+                                              buttonParamsJson:
+                                                '{"display_text":"CLICK HERE","url":"https://api.kiicodeit.me","webview_presentation":null}',
+                                            },
+                                          ],
+                                        },
+                                      },
+                                                        {
+                                        header: {
+                                          imageMessage: await image(url4),
+                                          hasMediaAttachment: true,
+                                        },
+                                        body: { text: "Image 4/5" },
+                                        nativeFlowMessage: {
+                                          buttons: [
+                                            {
+                                              name: "cta_url",
+                                              buttonParamsJson:
+                                                '{"display_text":"CLICK HERE","url":"https://api.kiicodeit.me","webview_presentation":null}',
+                                            },
+                                          ],
+                                        },
+                                      },
+                                                        {
+                                        header: {
+                                          imageMessage: await image(url5),
+                                          hasMediaAttachment: true,
+                                        },
+                                        body: { text: "Image 5/5" },
+                                        nativeFlowMessage: {
+                                          buttons: [
+                                            {
+                                              name: "cta_url",
+                                              buttonParamsJson:
+                                                '{"display_text":"CLICK HERE","url":"https://api.kiicodeit.me","webview_presentation":null}',
+                                            },
+                                          ],
+                                        },
+                                      },
+                    
+                                    ],
+                                    messageVersion: 1,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          {}
+                        );
+                    
+                        await client.relayMessage(msg.key.remoteJid, msg.message, {
+                          messageId: msg.key.id
+                        });
+                    };
+                    break
             case "pin":
             case "pinterest":
             case "pindl": {
@@ -1255,9 +1539,10 @@ export default async function Message(client, store, m, chatUpdate) {
                         await client.sendMessage(m.from, { image: { url: a.result.data.image }, caption: a.result.data.title }, { quoted: m });
                     }
                 } else {
-                    if (m.isGroup) return m.reply("Please send the query in private chat.");
+                    if (!m.text) return m.reply("Please enter the query or URL.");
+                    //if (m.isGroup) return m.reply("Please send the query in private chat.");
                     let [query, jumlah] = m.text.split("|");
-                    let a = await Func.fetchJson(`https://aemt.me/pinterest?query=${query}`);
+                    let a = await Func.fetchJson(`https://aemt.me/pinterest?query=${m.text}`);
                     if (!a || !a.result || a.result.length === 0) return m.reply("No results found for the query.");
                     const count = jumlah ? parseInt(jumlah.trim()) : 1;
                     for (let i = 0; i < count && i < a.result.length; i++) {
@@ -1326,6 +1611,13 @@ export default async function Message(client, store, m, chatUpdate) {
                 await client.sendMessage(m.from, { image: { url: api } }, { quoted: m })
             }
                 break
+            case "ytc":
+            case "ytcomment": {
+                if (!m.text) return m.reply("Please enter the text.")
+                let api = `https://some-random-api.com/canvas/misc/youtube-comment?username=${m.pushName}&avatar=https://i.pinimg.com/564x/8a/e9/e9/8ae9e92fa4e69967aa61bf2bda967b7b.jpg&comment=${m.text}`
+                await client.sendMessage(m.from, { image: { url: api } }, { quoted: m })
+            }
+                break
             case "qoute":
             case "quotely":
             case "qc":
@@ -1365,6 +1657,14 @@ export default async function Message(client, store, m, chatUpdate) {
                 } catch (e) {
                     m.reply(util.format(e))
                 }
+                break
+            case 'afk': {
+                if (!m.isGroup) return m.reply("This command is only available in groups.");
+                let user = db.users[m.sender]
+                    user.afkTime = + new Date
+                    user.afkReason = m.text
+                m.reply(`@${m.sender.split`@`[0]} is now AFK\n\nReason : ${user.afkReason ? user.afkReason : 'Nothing'}`)
+            }
                 break
             case "delete":
             case "d":
@@ -1521,11 +1821,11 @@ export default async function Message(client, store, m, chatUpdate) {
             case "igstalk": {
                 if (!m.text) return m.reply("Please enter the username.");
                 try {
-                    let a = await Func.fetchJson(`https://aemt.me/download/igstalk?username=${m.text}`);
-                    if (!a || !a.result || !a.result.user_info) return m.reply("Failed to fetch user information.");
-                    const { id, username, full_name, biography, external_url, is_private, is_verified, profile_pic_url, posts, followers, following } = a.result.user_info;
-                    const teks = `*INSTAGRAM STALK*\n\n*Username*: ${username}\n*Full Name*: ${full_name}\n*Biography*: ${biography}\n*External URL*: ${external_url}\n*Private*: ${is_private ? "Yes" : "No"}\n*Verified*: ${is_verified ? "Yes" : "No"}\n*Posts*: ${posts}\n*Followers*: ${followers}\n*Following*: ${following}`;
-                    await client.sendMessage(m.from, { image: { url: profile_pic_url }, caption: teks }, { quoted: m });
+                    let a = await Func.fetchJson(`https://api.lolhuman.xyz/api/stalkig/${m.text}?apikey=${Config.Apikey.Lol}`);
+                    if (!a || !a.result || !a.result) return m.reply("Failed to fetch user information.");
+                    const { id, username, fullname, bio, photo_profile, posts, followers, following } = a.result;
+                    const teks = `*INSTAGRAM STALK*\n\n*Username*: ${username}\n*Full Name*: ${fullname}\n*Biography*: ${bio}\n*Posts*: ${posts}\n*Followers*: ${followers}\n*Following*: ${following}`;
+                    await client.sendMessage(m.from, { image: { url: photo_profile }, caption: teks }, { quoted: m });
                 } catch (error) {
                     console.error("Error fetching user information:", error);
                     m.reply("An error occurred while fetching user information.");
@@ -1577,8 +1877,21 @@ export default async function Message(client, store, m, chatUpdate) {
                 */
             }
                 break
+            case "listtmp":
+            case "ltmp": {
+                if (!m.isCreator) return m.reply("Sorry, only the creator can do this.")
+                let a = fs.readdirSync("./src/temp");
+                if (a.length === 0) return m.reply("No Tmp available.")
+                let text = "`List Tmp`\n\n"
+                for (let sampah of a) {
+                    text += `> ${sampah}\n`
+                }
+                m.reply(text, { contextInfo: { mentionedJid: a } })
+            }
+                break
             case "deltmp":
             case "deletetmp": {
+                if (!m.isCreator) return m.reply("Sorry, only the creator can do this.")
                 let a = fs.readdirSync("./src/temp");
                 for (let b of a) {
                     if (b !== ".nomedia") {
@@ -1618,9 +1931,9 @@ export default async function Message(client, store, m, chatUpdate) {
             case "jadwalsholat":
             case "jadwalsolat": {
                 if (!m.text) return m.reply("Please enter the city.");
-                let a = await Func.fetchJson(`https://api.lolhuman.xyz/api/sholat/yogyakarta?apikey=${Config.Apikey.Lol}`)
+                let a = await Func.fetchJson(`https://api.lolhuman.xyz/api/sholat/${m.text}?apikey=${Config.Apikey.Lol}`)
                 let b = `*JADWAL SHOLAT*\n`
-                b += `*City*: ${a.result.wilayah}\n`
+                b += `*City*: ${m.text}\n`
                 b += `*Date*: ${a.result.tanggal}\n`
                 b += `*Fajr*: ${a.result.subuh}\n`
                 b += `*Sunrise*: ${a.result.dhuha}\n`
