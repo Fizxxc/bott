@@ -42,6 +42,9 @@ export default async function Message(client, store, m, chatUpdate) {
         let isCommand = (m.prefix && m.body.startsWith(m.prefix)) || false
         let isPremium = premium.map(a => a).includes(m.sender.split("@")[0])
 
+        // Function React by choco
+        //let reactionMessage = baileys.proto.Message.reactionMessage.create({ key: m.key, text: ""})
+
         // Function For Group
         let isAntiLink = antilink.includes(m.from) && m.isGroup
         if (isAntiLink) {
@@ -98,6 +101,11 @@ export default async function Message(client, store, m, chatUpdate) {
                 `🕒 ${new Date().toLocaleTimeString()}`
             );
         }
+        //Countdown
+        const today = new Date();
+        const ramadanStart = new Date(today.getFullYear(), 3, 12); 
+        const ramadanEnd = new Date(today.getFullYear(), 4, 13); 
+        //None
         client.autoshalat = client.autoshalat ? client.autoshalat : {};
         let who =
           m.mentionedJid && m.mentionedJid[0]
@@ -114,7 +122,7 @@ export default async function Message(client, store, m, chatUpdate) {
           Dzuhur: "11:27",
           Ashar: "14:48",
           Maghrib: "17:20",
-          Isya: "18:33",
+          Isya: "18:43",
           Tahajud: "00:04",
         };
         const datek = new Date(
@@ -416,7 +424,42 @@ export default async function Message(client, store, m, chatUpdate) {
                 m.reply(`> Bot has been active for ${runtime}`)
             }
                 break
-
+            case 'waktubukapuasa':{
+                const bukapuasa = Func.getWaktuBukaPuasa()
+                if (today >= ramadanStart && today <= ramadanEnd) return reply('Belum Ramadhan')
+                m.reply(`Waktu buka puasa hari ini pukul ${bukapuasa}`);
+                
+            }
+                break
+            /*case 'tod':{
+                client.sendMessage(m.chat, {        
+                    react: {
+                    text: '💚',
+                    key: m.key,
+                  }
+                })      
+            }
+            break*/
+            case 'lebaran':
+            case 'idulfitri':{
+                const pitri = Func.countdfitri()
+                m.reply(pitri)
+            }
+                break
+            case 'adha':
+            case 'iduladha':{
+                const kurban = Func.countdadha()
+                m.reply(kurban)
+            }
+                break
+            case 'hbdowner':
+            case 'hbd':
+            case 'ultah':
+            case 'ultahowner':{
+                const hbd = Func.ownerhbd()
+                m.reply(hbd)
+            }
+                break
 
             // Owner Command
             case "addbadword":
@@ -718,7 +761,7 @@ export default async function Message(client, store, m, chatUpdate) {
                         m.reply(bb)
                         break
                     case "Alya":
-                        timer = m.args[0] * 60000;
+                        m.reply("error")
                         break;
                     case 'Kii':
                     case 'Kiicodeit':
@@ -1283,6 +1326,24 @@ export default async function Message(client, store, m, chatUpdate) {
                 await client.sendMessage(m.from, {text: a.result, edit: load.key },{quoted:m})
             }
                 break
+            case "motor":
+            case "pesawat":
+            case "mobil":
+            case "mber":{
+                if (!m.text) return m.reply("Please enter prompt.");
+                let a = await Func.fetchJson(`https://api.kiicodeit.me/ai/character-ai?character=${Config.CAi.Motorr}&text=${m.text}&apikey=${Config.Apikey.Kii}`);
+                var torr = [
+                    "Get the data, Please Wait..",
+                    "Wait a minute, data is being procsessed!",
+                    "Send data..",
+                    a.result
+                ]
+                let load = await client.sendMessage(m.from, {text: 'Wait a minute, search the data'},{quoted:m})
+                for (let i = 0; i < torr.length; i++) {
+                await Func.delay(2000)
+                await client.sendMessage(m.from, {text: torr[i], edit: load.key },{quoted:m})
+            }}
+                break
             case "openai":
             case "openaii":
             case "ai":
@@ -1602,6 +1663,18 @@ export default async function Message(client, store, m, chatUpdate) {
                 }
             }
                 break;
+            /*case 'toptv': {
+                if (/image|video|webp/.test(quoted.msg.mimetype))
+                if (!m.quoted) throw `Balas Video Dengan Caption ${m.prefix}toptv`
+                //if (/video/.test(mime)) {
+                var ppt = m.quoted
+                var ptv = generateWAMessageFromContent(m.from, proto.Message.fromObject({
+                    "ptvMessage": ppt
+            }), { userJid: m.from, quoted:m})
+                    client.relayMessage(m.from, ptv.message, { messageId: ptv.key.id })
+                
+            }
+                break*/
             case "tweetc": {
                 if (!m.text) return m.reply("Please enter the text.")
                 let replies = Math.floor(Math.random() * 100) + 1

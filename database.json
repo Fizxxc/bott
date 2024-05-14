@@ -49,6 +49,66 @@
       "VIP": false,
       "name": "`Sezyy`",
       "banned": false
+    },
+    "6285725359081@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715693298453,
+      "premium": false,
+      "VIP": false,
+      "name": "Fairuz.",
+      "banned": false
+    },
+    "6287895687761@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715693350268,
+      "premium": false,
+      "VIP": false,
+      "name": "cules garis keras",
+      "banned": false
+    },
+    "6285706785612@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715693478042,
+      "premium": false,
+      "VIP": false,
+      "name": "zyngaa",
+      "banned": false
+    },
+    "6287777056787@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715696943125,
+      "premium": false,
+      "VIP": false,
+      "name": "choco-md",
+      "banned": false
+    },
+    "6281297556061@s.whatsapp.net": {
+      "afkTime": -1,
+      "afkReason": "",
+      "limit": 15,
+      "lastChat": 1715696943747,
+      "premium": false,
+      "VIP": false,
+      "name": ".",
+      "banned": false
+    },
+    "6283137516108@s.whatsapp.net": {
+      "afkTime": 1715697198674,
+      "afkReason": "mau turu cape tidur jam 3 mulu🗿",
+      "limit": 15,
+      "lastChat": 1715697198553,
+      "premium": false,
+      "VIP": false,
+      "name": "Arya.",
+      "banned": false
     }
   },
   "groups": {
@@ -66,6 +126,12 @@
     },
     "120363295542967455@g.us": {
       "lastChat": 1715618760628,
+      "mute": false,
+      "welcome": true,
+      "leave": true
+    },
+    "6289697372984-1598881719@g.us": {
+      "lastChat": 1715696943747,
       "mute": false,
       "welcome": true,
       "leave": true

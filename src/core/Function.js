@@ -9,6 +9,7 @@ import { fileTypeFromBuffer } from "@xyzendev/modules/core/second.modules.js";
 import axios from "axios";
 import FormData from "form-data";
 import mimes from "mime-types";
+import moment from "moment-timezone";
 
 const { toBuffer } = baileys;
 
@@ -199,6 +200,78 @@ export function runtime(seconds) {
     var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
     var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
     return dDisplay + hDisplay + mDisplay + sDisplay;
+}
+
+export function countdramadhan() {
+    const tanggalRamadhan = moment('2024-03-13', 'YYYY-MM-DD');
+    const tanggalHariIni = moment();
+    const selisihHari = tanggalRamadhan.diff(tanggalHariIni, 'days');
+    let pesan = '';
+    if (selisihHari > 0) {
+        pesan = `Tinggal ${selisihHari} hari menuju Ramadhan.`;
+    } else if (selisihHari === 0) {
+        pesan = `Hari ini adalah hari Ramadhan! Selamat menjalankan ibadah puasa.`;
+    } else {
+        pesan = `Ramadhan sudah berlalu. Semoga ibadah puasamu diterima.`;
+    }
+    
+    return pesan;
+}
+export function ownerhbd() {
+    const tanggalhbd = moment('2024-07-25', 'YYYY-MM-DD');
+    const tanggaltoday = moment();
+    const selisihHarii = tanggalhbd.diff(tanggaltoday, 'days');
+    let habd = '';
+    if (selisihHarii > 0) {
+        habd = `Tinggal ${selisihHarii} hari menuju Ultah My Owner's`;
+    } else if (selisihHarii === 0) {
+        habd = `Hari ini adalah hari Ultah My Owner's, Tolong dikasih kado ya :>`;
+    } else {
+        habd = `Hari Ultah My Owner's telah berlalu.`;
+    }
+    
+    return habd;
+}
+export function countdadha() {
+    const adhaa = moment('2024-06-17', 'YYYY-MM-DD');
+    const krban = moment();
+    const slisih = adhaa.diff(krban, 'days');
+    let mbek = '';
+    if (slisih > 0) {
+        mbek = `Tinggal ${slisih} hari menuju Idul Adha`;
+    } else if (selisihHarii === 0) {
+        mbek = `Hari ini adalah hari Raya Idul Adha! Waktunya Qurban.`;
+    } else {
+        mbek = `Hari Raya Idul Adha telah berlalu.`;
+    }
+    
+    return mbek;
+}
+
+export function getWaktuBukaPuasa() {
+    return 'Normal Pada 18:30 Wib';
+}
+
+export function countdfitri() {
+    // Tanggal Ramadhan tahun ini
+    const tanggallebaran = moment('2024-04-13', 'YYYY-MM-DD');
+    // Tanggal hari ini
+    const tanggallnya = moment();
+    
+    // Hitung selisih hari antara hari ini dan tanggal Ramadhan
+    const gganzm = tanggallebaran.diff(tanggallnya, 'days');
+    
+    // Membuat pesan balasan
+    let meseg = '';
+    if (gganzm > 0) {
+        meseg = `Tinggal ${gganzm} Hari Lagi Lebaran.`;
+    } else if (gganzm === 0) {
+        meseg = `Selamat Hari Raya idul Fitri,Mohon Maaf Lahir dan Batin.`;
+    } else {
+        meseg = `Ramadhan sudah berlalu. Semoga ibadah puasamu diterima.`;
+    }
+    
+    return meseg;
 }
 
 export function parseFileSize(input, si = true) {
