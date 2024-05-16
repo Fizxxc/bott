@@ -102,7 +102,7 @@ export default {
       'toimage',
       'toaudio'
     ],
-    ai: [ 'elaina', 'kakros','openai', 'motor', 'mobil', 'pesawat' ],
+    ai: [ 'elaina', 'kakros','openai', 'motor', 'mobil', 'pesawat', 'yamada' ],
     miscellaneous: [
       'tiktokstalk', 'githubstalk',
       'cariresep',   'bacaresep',
