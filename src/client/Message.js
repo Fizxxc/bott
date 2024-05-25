@@ -108,13 +108,13 @@ export default async function Message(client, store, m, chatUpdate) {
             if (!m.key.fromMe || m.isCreator) return;
         }
         if (m.message && !m.isBot) {
-            const messageTypeEmoji = m.isGroup ? "👥 Group" : "👤 Private";
+            const messageTypeEmoji = m.isGroup ? "ðŸ‘¥ Group" : "ðŸ‘¤ Private";
             const messageContent = m.body || m.type;
             console.log(
                 `${chalk.blue("FROM")}: ${chalk.yellow(m.pushName + " => " + m.sender)}\n` +
                 `${chalk.blue("IN")}: ${chalk.magenta(messageTypeEmoji)}\n` +
                 `${chalk.blue("MESSAGE")}: ${chalk.green(messageContent)}\n` +
-                `🕒 ${new Date().toLocaleTimeString()}`
+                `ðŸ•’ ${new Date().toLocaleTimeString()}`
             );
         }
         //Countdown
@@ -151,7 +151,7 @@ export default async function Message(client, store, m, chatUpdate) {
         const timeNow = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
         for (let [sholat, waktu] of Object.entries(jadwalSholat)) {
           if (timeNow === waktu) {
-        let caption = `📢 Hai Kak @${m.pushName}, *Waktu ${sholat}* telah tiba, ambilah air wudhu dan segeralah shalat 😇.\n\n*${waktu}*\n_Untuk wilayah JawaTimur dan sekitarnya._\n\n_Luangkan Waktu Mu Sejenak Untuk Mendekatkan Diri Kepada Yang Maha Kuasa_`;
+        let caption = `ðŸ“¢ Hai Kak @${m.pushName}, *Waktu ${sholat}* telah tiba, ambilah air wudhu dan segeralah shalat ðŸ˜‡.\n\n*${waktu}*\n_Untuk wilayah JawaTimur dan sekitarnya._\n\n_Luangkan Waktu Mu Sejenak Untuk Mendekatkan Diri Kepada Yang Maha Kuasa_`;
         client.autoshalat[id] = [
           m.reply(caption),
           setTimeout(async() => {
@@ -183,7 +183,7 @@ export default async function Message(client, store, m, chatUpdate) {
                             isForwarded: true,
                             mentionedJid: [m.sender],
                             forwardedNewsletterMessageInfo: {
-                                newsletterName: "🤖 " + Config.Information.Bot.name,
+                                newsletterName: "ðŸ¤– " + Config.Information.Bot.name,
                                 newsletterJid: "120363265419579977@newsletter"
                             },
                             externalAdReply: {
@@ -205,7 +205,7 @@ export default async function Message(client, store, m, chatUpdate) {
                             isForwarded: true,
                             mentionedJid: [m.sender],
                             forwardedNewsletterMessageInfo: {
-                                newsletterName: "🤖 " + Config.Information.Bot.name,
+                                newsletterName: "ðŸ¤– " + Config.Information.Bot.name,
                                 newsletterJid: "120363265419579977@newsletter"
                             },
                             externalAdReply: {
@@ -234,7 +234,7 @@ export default async function Message(client, store, m, chatUpdate) {
                                         isForwarded: true,
                                         forwardedNewsletterMessageInfo: {
                                             newsletterJid: '120363265419579977@newsletter',
-                                            newsletterName: "🤖 " + Config.Information.Bot.name,
+                                            newsletterName: "ðŸ¤– " + Config.Information.Bot.name,
                                             serverMessageId: - 1
                                         },
                                         businessMessageForwardInfo: { businessOwnerJid: "6285791346128@s.whatsapp.net" },
@@ -284,7 +284,7 @@ export default async function Message(client, store, m, chatUpdate) {
                             isForwarded: true,
                             mentionedJid: [m.sender],
                             forwardedNewsletterMessageInfo: {
-                                newsletterName: "🤖 " + Config.Information.Bot.name,
+                                newsletterName: "ðŸ¤– " + Config.Information.Bot.name,
                                 newsletterJid: "120363265419579977@newsletter"
                             },
                             externalAdReply: {
@@ -450,7 +450,7 @@ export default async function Message(client, store, m, chatUpdate) {
             /*case 'tod':{
                 client.sendMessage(m.chat, {        
                     react: {
-                    text: '💚',
+                    text: 'ðŸ’š',
                     key: m.key,
                   }
                 })      
@@ -1025,7 +1025,7 @@ export default async function Message(client, store, m, chatUpdate) {
                     case 'hari':
                         timer = m.args[0] * 86400000;
                         break;
-                    default: return m.reply("*Choose:*\n🕒 second\n⏱ minute\n⏰ hour\n📅 day\n\n*Example:*\n10 seconds*")
+                    default: return m.reply("*Choose:*\nðŸ•’ second\nâ± minute\nâ° hour\nðŸ“… day\n\n*Example:*\n10 seconds*")
                 }
                 m.reply(`The group will be closed for ${m.args[0]} ${m.args[1]} starting from now.`);
                 setTimeout(() => {
@@ -1056,7 +1056,7 @@ export default async function Message(client, store, m, chatUpdate) {
                     case 'hari':
                         timer = m.args[0] * 86400000;
                         break;
-                    default: return m.reply("*Choose:*\n🕒 second\n⏱ minute\n⏰ hour\n📅 day\n\n*Example:*\n10 seconds*")
+                    default: return m.reply("*Choose:*\nðŸ•’ second\nâ± minute\nâ° hour\nðŸ“… day\n\n*Example:*\n10 seconds*")
                 }
                 m.reply(`The group will be reopened after ${m.args[0]} ${m.args[1]} starting from now`);
                 setTimeout(() => {
@@ -1083,7 +1083,7 @@ export default async function Message(client, store, m, chatUpdate) {
             case "tagall": {
                 if (!m.isGroup) return m.reply("This command is only available in groups.");
                 if (!m.isAdmin && !m.isCreator) return m.reply("Only group admins can use this command.");
-                let message = `🔔 *TAG FOR ADMIN* 🔔\n\n*message:* ${m.text ? m.text : 'empty'}\n\n`;
+                let message = `ðŸ”” *TAG FOR ADMIN* ðŸ””\n\n*message:* ${m.text ? m.text : 'empty'}\n\n`;
                 for (let i of m.metadata.participants) {
                     message += `> @${i.id.split('@')[0]}\n`;
                 }
@@ -1803,27 +1803,27 @@ export default async function Message(client, store, m, chatUpdate) {
             case 'kalkulator': 
             case 'calculator': {
                 let val = m.text
-                  .replace(/[^0-9\-\/+*×÷πEe()piPI/]/g, '')
-                  .replace(/×/g, '*')
-                  .replace(/÷/g, '/')
-                  .replace(/π|pi/gi, 'Math.PI')
+                  .replace(/[^0-9\-\/+*Ã—Ã·Ï€Ee()piPI/]/g, '')
+                  .replace(/Ã—/g, '*')
+                  .replace(/Ã·/g, '/')
+                  .replace(/Ï€|pi/gi, 'Math.PI')
                   .replace(/e/gi, 'Math.E')
                   .replace(/\/+/g, '/')
                   .replace(/\++/g, '+')
                   .replace(/-+/g, '-')
                 let format = val
-                  .replace(/Math\.PI/g, 'π')
+                  .replace(/Math\.PI/g, 'Ï€')
                   .replace(/Math\.E/g, 'e')
-                  .replace(/\//g, '÷')
-                  .replace(/\*×/g, '×')
+                  .replace(/\//g, 'Ã·')
+                  .replace(/\*Ã—/g, 'Ã—')
                 try {
                   console.log(val)
                   let result = (new Function('return ' + val))()
                   if (!result) throw result
                   m.reply(`*${format}* = _${result}_`)
                 } catch (e) {
-                  if (e == undefined) return m.reply('Isinya?\nhanya 0-9 dan Simbol -, +, *, /, ×, ÷, π, e, (, ) yang disupport')
-                  m.reply('Format salah, hanya 0-9 dan Simbol -, +, *, /, ×, ÷, π, e, (, ) yang disupport')
+                  if (e == undefined) return m.reply('Isinya?\nhanya 0-9 dan Simbol -, +, *, /, Ã—, Ã·, Ï€, e, (, ) yang disupport')
+                  m.reply('Format salah, hanya 0-9 dan Simbol -, +, *, /, Ã—, Ã·, Ï€, e, (, ) yang disupport')
                 }
             }
                 break
