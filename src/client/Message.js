@@ -16,8 +16,8 @@ const premium = JSON.parse(fs.readFileSync('./src/database/roles/premium.json'))
 const antilink = JSON.parse(fs.readFileSync('./src/database/group/antilink.json'))
 const antibadword = JSON.parse(fs.readFileSync('./src/database/group/antibadword.json'))
 
-
 const badword = JSON.parse(fs.readFileSync('./src/database/function/badword.json'))
+const autoai = JSON.parse(fs.readFileSync('./src/database/users/autoai.json'))
 
 /**
  *
@@ -40,7 +40,8 @@ export default async function Message(client, store, m, chatUpdate) {
         let quoted = m.isQuoted ? m.quoted : m
         let Downloaded = async (fileName) => await client.downloadMediaMessage(quoted, fileName)
         let isCommand = (m.prefix && m.body.startsWith(m.prefix)) || false
-        let isPremium = premium.map(a => a).includes(m.sender.split("@")[0])
+        let isPremium = premium.includes(m.sender) || false
+        //premium.map(a => a).includes(m.sender.split("@")[0])
 
         // Function React by choco
         //let reactionMessage = baileys.proto.Message.reactionMessage.create({ key: m.key, text: ""})
@@ -61,6 +62,21 @@ export default async function Message(client, store, m, chatUpdate) {
                 if (m.isAdmin) return;
                 if (m.isCreator) return;
                 await client.sendMessage(m.from, { delete: quoted.key })
+            }
+        }
+
+        let isAutoai = autoai.includes(m.sender.split("@")[0]) || false
+        if (isAutoai) {
+            try {
+                let res = await blackbox(m.text, "user")
+                if (res) {
+                    await client.sendMessage(m.from, {text: res}, m)
+                } else {
+                    await client.sendMessage(m.from, {text: "Maaf, terjadi kesalahan saat mengirim pesan"}, m)
+                }
+            } catch (e) {
+                console.log(e);
+                client.sendMessage(m.from, {text: "Maaf, terjadi kesalahan saat mengirim pesan"}, m)
             }
         }
 
@@ -634,6 +650,16 @@ export default async function Message(client, store, m, chatUpdate) {
                 Config.Settings.read = !Config.Settings.read
                 fs.writeFileSync('./src/Utils/Config.js', `export default ${util.inspect(Config)}`)
                 m.reply(`> Auto read message has been ${Config.Settings.read ? "enabled" : "disabled"}`)
+            }
+                break
+            case 'autoai': {
+                if (isAutoai) {
+                    autoai.splice(autoai.indexOf(m.sender.split("@")[0]), 1)
+                    await client.sendMessage(m.from, {text: "Autoai telah dimatikan"}, m)
+                } else {
+                    autoai.push(m.sender.split("@")[0])
+                    await client.sendMessage(m.from, {text: "Autoai telah dihidupkan"}, m)
+                }
             }
                 break
             case "getsw":
@@ -1323,6 +1349,15 @@ export default async function Message(client, store, m, chatUpdate) {
                 let a = await Func.fetchJson(`https://api.kiicodeit.me/ai/character-ai?character=${Config.CAi.Kakros}&text=${m.text}&apikey=${Config.Apikey.Kii}`);
                 let load = await client.sendMessage(m.from, {text: 'Kak Ros typing'},{quoted:m})
                 await Func.delay(2000)
+                await client.sendMessage(m.from, {text: a.result, edit: load.key },{quoted:m})
+            }
+                break
+            case "yamada":
+            case "anna":{
+                if (!m.text) return m.reply("Please enter prompt.");
+                let a = await Func.fetchJson(`https://api.kiicodeit.me/ai/character-ai?character=${Config.CAi.Yamada}&text=${m.text}&apikey=${Config.Apikey.Kii}`);
+                let load = await client.sendMessage(m.from, {text: 'Yamada anna typing'},{quoted:m})
+                await Func.delay(3000)
                 await client.sendMessage(m.from, {text: a.result, edit: load.key },{quoted:m})
             }
                 break
