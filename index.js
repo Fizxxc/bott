@@ -1,6 +1,8 @@
-import { treeKill } from "./src/index.js";
-import { cfonts, fs, path } from "@xyzendev/modules/core/main.modules.js";
-import { exec, spawn } from "@xyzendev/modules/core/second.modules.js";
+import { treeKill } from "./resources/index.js";
+import cfonts from "cfonts";
+import fs from "fs";
+import path from "path";
+import { exec, spawn } from "child_process";
 
 let activeProcess = null
 
@@ -18,7 +20,7 @@ function start(file) {
             }
         })
     } else {
-        cfonts.say("Starting...", {
+        /* cfonts.say("Starting...", {
             font: "simple",
             align: "center",
             colors: ["system"],
@@ -26,7 +28,7 @@ function start(file) {
             letterSpacing: 1,
             lineHeight: 1,
             space: true
-        })
+        }) */
         let args = [path.join(process.cwd(), file), ...process.argv.slice(2)]
         let p = spawn(process.argv[0], args, {
             stdio: ["inherit", "inherit", "inherit", "ipc"]
@@ -55,4 +57,4 @@ function start(file) {
     }
 }
 
-start("./src/client/Connecting.js")
+start("./resources/client/Main.js")
