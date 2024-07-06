@@ -22,7 +22,7 @@ export default {
     packName: 'Natsu UNIVERSE',
     packPublish: '',
     Prefix: '!',
-    Title: 'coppyright : Natsu UNIVERSE',
+    Title: 'coppyright : ©Natsu UNIVERSE',
     Watermark: 'Powered By FizzxDEV',
     ImgUrl: 'https://telegra.ph/file/324f17c0f056d2c0ce60c.jpg'
   },
